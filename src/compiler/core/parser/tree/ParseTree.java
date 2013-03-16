@@ -17,14 +17,15 @@ import java.util.List;
 /**
  * Created with IntelliJ IDEA.
  */
+//Class for constructing parse tree and for working with it
 public class ParseTree {
 
-    private List<Token> inputTokensList;
-    private ParsingTable parsingTable;
-    private List<Integer> outputRulesList;
-    private LinkedList<Object> stack;
-    private LinkedList<TreeNode> treeStack;
-    private TreeNode treeRoot;
+    private List<Token> inputTokensList;    //Input tokens for constructing the tree
+    private ParsingTable parsingTable;  //Parsing table which is using for tree constructing
+    private List<Integer> outputRulesList;  //The sequence of rules which were used to construct the tree
+    private LinkedList<Object> stack;   //Stack of the parser
+    private LinkedList<TreeNode> treeStack; //Stack with tree nodes which is appropriate to the parser stack content
+    private TreeNode treeRoot;  //The root node of the tree
 
     public ParseTree(List<Token> inputTokensList) {
         this.inputTokensList = inputTokensList;
@@ -33,11 +34,13 @@ public class ParseTree {
         initStack();
     }
 
+    //Initialization of parsing table for Perl translating
     private void initParsingTable() {
         parsingTable = new ParsingTable(Nonterminal.values().length, LexicalUnit.values().length);
         parsingTable.fillTheParsingTable();
     }
 
+    //Stack initialization
     private void initStack() {
         stack = new LinkedList<Object>();
         stack.addFirst(LexicalUnit.getStackBottomSymbol());
@@ -48,14 +51,15 @@ public class ParseTree {
         treeStack.addFirst(treeRoot);
     }
 
+    //Parsing method. Constructs the tree
     public void doParsing() {
         boolean isSymbolRead;
-        for (Token symbol : inputTokensList) {
+        for (Token symbol : inputTokensList) {  //Loop for each input token
             isSymbolRead = false;   // Shows is the symbol has being read and we can work with the next input symbol
             while (!isSymbolRead) {
-                if (stack.getFirst().getClass() == LexicalUnit.class) {
-                    if (symbol.getLexicalUnit() == stack.getFirst()) {
-                        if(stack.removeFirst() != LexicalUnit.EOF){
+                if (stack.getFirst().getClass() == LexicalUnit.class) { // Top-most symbol of the stack is the LexicalUnit
+                    if (symbol.getLexicalUnit() == stack.getFirst()) {  //Check whether stack top symbol is the same as the current input token
+                        if(stack.removeFirst() != LexicalUnit.EOF){ //Set tree node value of not end of file
                             treeStack.removeFirst().setNodeValue(symbol);
                         }
 
@@ -63,30 +67,30 @@ public class ParseTree {
 //                        System.out.println("read " + symbol.getLexicalUnit());
 //                        System.out.println(Arrays.toString(stack.toArray()));
 
-                        isSymbolRead = true;
-                    } else {
+                        isSymbolRead = true;    //Symbol has been read and we can process the next one
+                    } else {    //If stack top lexical unit is not the same as the current token -> then parsing error
                         System.out.println("Parsing error! Top-most symbol of the stack is not equal to the input stream symbol!");
                         System.exit(1);
                     }
                 } else {    // Top-most symbol of the stack is the Nonterminal
-                    int ruleNumber = parsingTable.getRuleFromCell((Nonterminal) stack.getFirst(), symbol.getLexicalUnit());
-                    if (ruleNumber != -1) {
+                    int ruleNumber = parsingTable.getRuleFromCell((Nonterminal) stack.getFirst(), symbol.getLexicalUnit()); //Get parsing table rule for top stack symbol and current input token
+                    if (ruleNumber != -1) { //Check whether rule is valid (is existing)
                         outputRulesList.add(ruleNumber);
-                        stack.removeFirst();
+                        stack.removeFirst();    //Remove top of the stack
 
                         TreeNode parentNode = treeStack.removeFirst();
 
-                        List<Object> addToStack = PerlGrammar.getRuleByNumber(ruleNumber).getRightSideRule();
-                        for (int i = addToStack.size() - 1; i >= 0; i--) {
-                            if (addToStack.get(i) != null) {
-                                stack.addFirst(addToStack.get(i));
+                        List<Object> addToStack = PerlGrammar.getRuleByNumber(ruleNumber).getRightSideRule();   //Rule's objects to add to stack
+                        for (int i = addToStack.size() - 1; i >= 0; i--) {  //For each right side rule unit that must be added to stack (in vice versa order)
+                            if (addToStack.get(i) != null) {    //If not lambda, do...
+                                stack.addFirst(addToStack.get(i));  //Add unit from rule to stack
 
-                                TreeNode newNode = new TreeNode(addToStack.get(i), ruleNumber);
-                                newNode.setParentNode(parentNode);
-                                treeStack.addFirst(newNode);
+                                TreeNode newNode = new TreeNode(addToStack.get(i), ruleNumber); //Create tree node
+                                newNode.setParentNode(parentNode);  //Define tree node parent
+                                treeStack.addFirst(newNode);    //Add tree node to stack
                             }
                         }
-                    } else {
+                    } else {    //No such rule in parsing table. Parsing error
                         System.out.println("Parsing error! No such rule! " + stack.getFirst() + " " + symbol.getLexicalUnit());
                         System.exit(1);
                     }
@@ -99,6 +103,7 @@ public class ParseTree {
         return outputRulesList;
     }
 
+    //For debug. Test of the parser and code generation
     public static void main(String[] args) throws IOException {
         FiniteAutomaton finiteAutomaton = new FiniteAutomaton();
         finiteAutomaton.setStartState(PerlAutomatonSettings.getStartState());

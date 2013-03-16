@@ -12,17 +12,18 @@ import java.util.List;
 /**
  * Created with IntelliJ IDEA.
  */
+//Represents node of tree with parent and children nodes
 public class TreeNode {
 
-    private Object nodeValue;
+    private Object nodeValue;   //The value of node if it's exists
 
-    private LinkedList<TreeNode> childrenNodes;
+    private LinkedList<TreeNode> childrenNodes; //List of children nodes
 
-    private TreeNode parentNode = null;
+    private TreeNode parentNode = null; //Parent node
 
-    private int rule = -1;
+    private int rule = -1;  //The rule what was used to create the node
 
-    private CodeGenerator codeGenerator;
+    private CodeGenerator codeGenerator;    //The instance of code generator
 
     public TreeNode(Object nodeValue, int rule) {
         this.nodeValue = nodeValue;
@@ -31,10 +32,12 @@ public class TreeNode {
         codeGenerator = new CodeGenerator();
     }
 
+    //Returns true if node has at least one child
     public boolean hasChildren() {
         return !childrenNodes.isEmpty();
     }
 
+    //Returns true if children nodes of current node don't have children
     public boolean isCompressable() {
         for (TreeNode child : childrenNodes) {
             if (child.hasChildren()) {
@@ -44,6 +47,7 @@ public class TreeNode {
         return true;
     }
 
+    //Removes all children nodes
     public void removeChildrenNodes() {
         for (TreeNode child : childrenNodes) {
             child.removeParent();
@@ -51,16 +55,19 @@ public class TreeNode {
         childrenNodes.clear();
     }
 
+    //Removes parent of current node
     public void removeParent() {
         parentNode.childrenNodes.remove(this);
         parentNode = null;
     }
 
+    //Adds the child to the node
     public void addChildNode(TreeNode childNode) {
         childNode.parentNode = this;
         childrenNodes.addFirst(childNode);
     }
 
+    //Sets the parent node for the current node
     public void setParentNode(TreeNode parentNode) {
         parentNode.addChildNode(this);
     }
@@ -89,6 +96,7 @@ public class TreeNode {
         return rule;
     }
 
+    //Returns the number of the whole tree under the current node
     public int getTreeNodes() {
         int sum = 0;
         for (TreeNode child : childrenNodes) {
@@ -98,6 +106,7 @@ public class TreeNode {
         return sum;
     }
 
+    //Returns the text representation of the tree
     public String getTreeText() {
         String a = "";
         a = a.concat(nodeValue.toString() + " " + rule + "\n");
@@ -107,6 +116,7 @@ public class TreeNode {
         return a;
     }
 
+    //Returns the text representation of the branch of the tree
     private String getBranchText(String s) {
         String a = "";
         a = a.concat(nodeValue.toString() + " " + rule + "\n");
@@ -116,36 +126,37 @@ public class TreeNode {
         return a;
     }
 
+    //Method for code generating
     public StringBuilder generateCode() {
-        StringBuilder returnCode = new StringBuilder();
-        if (!isCompressable()) {
+        StringBuilder returnCode = new StringBuilder(); //Generated code
+        if (!isCompressable()) {    //If node is not compressable then try to compress all the children nodes recursively
             for (TreeNode child : childrenNodes) {
                 returnCode.append(child.generateCode());
             }
         }
-        if (isCompressable()) {
-            if (childrenNodes.size() == 1) {
+        if (isCompressable()) { //Compress node and generate the code
+            if (childrenNodes.size() == 1) {    //Compress node if it has one child (child node simply replaces the parent)
                 this.nodeValue = childrenNodes.getFirst().nodeValue;
                 removeChildrenNodes();
             }
-            if (childrenNodes.size() > 1) {
+            if (childrenNodes.size() > 1) { //Compress node if it has more then one child (generate code appropriately to children contain)
                 System.out.println("there must be computing");
-                List<Token> commandTokens = new LinkedList<Token>();
+                List<Token> commandTokens = new LinkedList<Token>();    //Choose only Tokens from children, delete all meaningless Nonterminals
                 for (TreeNode node : childrenNodes) {
                     if (node.nodeValue.getClass() == Token.class) {
                         commandTokens.add((Token) node.nodeValue);
                     }
                     node.parentNode = null;
                 }
-                if (commandTokens.size() == 1) {
+                if (commandTokens.size() == 1) {    //Compress node if it has one usefull child
                     this.nodeValue = commandTokens.get(0);
-                } else {
+                } else {    //Generate appropriate code using code generator
                     GenerationRule generationRule = codeGenerator.generateOperationCode(commandTokens);
                     returnCode.append(generationRule.getGeneratedCode());
                     this.nodeValue = generationRule.getCompressIntoToken();
                 }
             }
-            if (childrenNodes.isEmpty() && nodeValue.getClass() == Nonterminal.class) {
+            if (childrenNodes.isEmpty() && nodeValue.getClass() == Nonterminal.class) { //If no children -> remove node from parent's children list
                 removeParent();
             }
             childrenNodes.clear();
