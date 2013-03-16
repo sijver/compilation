@@ -10,13 +10,14 @@ import java.util.List;
 /**
  * Created with IntelliJ IDEA.
  */
+//Code generator. Represents the rules using which tree can be compressed and code can be generated
 public class CodeGenerator {
 
-    private static int numOfRegisters = 16;
+    private static int numOfRegisters = 16; //Num of registers can be used
 
-    private Register register;
-    private List<Variable> variables;
-    private Scope mainScope;
+    private Register register;  //Registers list
+    private List<Variable> variables;   //List of all the variables used in script
+    private Scope mainScope;    //Link to the main scope
 
     public CodeGenerator() {
         register = new Register(numOfRegisters);
@@ -24,8 +25,9 @@ public class CodeGenerator {
         mainScope = new Scope();
     }
 
+    //Method for choosing of appropriate way of compressing of the tokens sequence
     public GenerationRule generateOperationCode(List<Token> commandTokens) {
-        if (commandContainsLexicalUnit(commandTokens, LexicalUnit.PLUS)) {
+        if (commandContainsLexicalUnit(commandTokens, LexicalUnit.PLUS)) {  //PLUS method choosing
             return addition(commandTokens);
         }
         GenerationRule genRule = new GenerationRule();
@@ -34,6 +36,7 @@ public class CodeGenerator {
         return genRule;
     }
 
+    //Returns whether list of tokens is containing token of appropriate lexical unit
     public boolean commandContainsLexicalUnit(List<Token> tokensList, LexicalUnit lexicalUnit) {
         for (Token token : tokensList) {
             if (token.getLexicalUnit() == lexicalUnit) {
@@ -43,12 +46,13 @@ public class CodeGenerator {
         return false;
     }
 
+    //Generation of PLUS assembler code
     public GenerationRule addition(List<Token> commandTokens) {
         GenerationRule generationRule = new GenerationRule();
         StringBuilder command = new StringBuilder();
         if (commandTokens.get(0).getLexicalUnit() == LexicalUnit.PLUS) {
             generationRule.setCompressIntoToken(new Token(LexicalUnit.PLUS, null));
-            int reg = register.getNextUnusingRegister();
+            int reg = register.getNextDisusingRegister();
             if (reg != -1) {
                 register.setRegisterUsing(reg, true);
                 generationRule.setRegisterUsing(reg);

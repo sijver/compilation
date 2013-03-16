@@ -5,11 +5,14 @@ import compiler.core.scanner.finiteautomaton.Token;
 /**
  * Created with IntelliJ IDEA.
  */
+//Describes the compression of tree node.
+// Shows which kind of node will be after compressing children nodes
+// and code which was generated in process of compressing.
 public class GenerationRule {
 
-    private Token compressIntoToken;
+    private Token compressIntoToken;    //Which kind of node will be after compressing children nodes
 
-    private String generatedCode;
+    private String generatedCode;   //Code which was generated in process of compressing
 
     public GenerationRule() {
     }
