@@ -5,6 +5,7 @@ import compiler.core.parser.Follow;
 import compiler.core.parser.GrammarRule;
 import compiler.core.parser.Nonterminal;
 import compiler.core.scanner.finiteautomaton.LexicalUnit;
+import compiler.core.utils.HtmlStyler;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -61,30 +62,36 @@ public class ParsingTable {
         }
     }
 
-    //For debug and output the parsing table in html format
-    public static void main(String[] args) {
+    public static String getParsingTableHtml(){
+        StringBuilder parsingTableHtml = new StringBuilder();
         ParsingTable parsingTable = new ParsingTable(Nonterminal.values().length, LexicalUnit.values().length);
         parsingTable.fillTheParsingTable();
-        System.out.println("<html><body><table>");
-        System.out.println("<tr><th></th>");
+        parsingTableHtml.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><title>Parsing Table</title>" + HtmlStyler.HTML_STYLE + "</head><body><table>");
+        parsingTableHtml.append("<tr><th></th>");
         for(LexicalUnit lexicalUnit : LexicalUnit.values()){
-            System.out.println(String.format("<th>%s</th>", lexicalUnit.name()));
+            parsingTableHtml.append(String.format("<th>%s</th>", lexicalUnit.name()));
         }
-        System.out.println("</tr>");
+        parsingTableHtml.append("</tr>");
         for(int i = 0; i <  Nonterminal.values().length; i++){
-            System.out.println("<tr>");
-            System.out.println(String.format("<th>%s</th>", Nonterminal.values()[i].name()));
+            parsingTableHtml.append("<tr>");
+            parsingTableHtml.append(String.format("<th>%s</th>", Nonterminal.values()[i].name()));
             for(int j = 0; j < LexicalUnit.values().length; j++){
                 if(parsingTable.getRuleFromCell(i, j) != -1){
-                    System.out.print(String.format("<td>%d</td>", parsingTable.getRuleFromCell(i, j)));
+                    parsingTableHtml.append(String.format("<td>%d</td>", parsingTable.getRuleFromCell(i, j)));
                 } else {
-                    System.out.print("<td>-</td>");
+                    parsingTableHtml.append("<td>-</td>");
                 }
 
             }
-            System.out.println("</tr>");
+            parsingTableHtml.append("</tr>");
         }
-        System.out.println("</table></body></html>");
+        parsingTableHtml.append("</table></body></html>");
+        return parsingTableHtml.toString();
+    }
+
+    //For debug and output the parsing table in html format
+    public static void main(String[] args) {
+        System.out.println(getParsingTableHtml());
     }
 
 

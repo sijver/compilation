@@ -1,6 +1,8 @@
 package compiler.core.parser;
+
 import compiler.core.parser.perl.PerlGrammar;
 import compiler.core.scanner.finiteautomaton.LexicalUnit;
+import compiler.core.utils.HtmlStyler;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -88,6 +90,24 @@ public class Follow {
             }
         }
         return null;
+    }
+
+    public static String getFollowHtml() {
+        StringBuilder followHtml = new StringBuilder();
+        followHtml.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><title>Follow</title>" + HtmlStyler.getHtmlStyleLeftAlign() + "</head><body><table>");
+        for (Follow f : getAllFollowList()) {
+            followHtml.append("<tr><th>" + f.getNonterminal().toString() + "</th><td>");
+            for (LexicalUnit unit : f.getFollowList()) {
+                if (unit != null) {
+                    followHtml.append(unit.toString() + " ");
+                } else {
+                    followHtml.append("lambda ");
+                }
+            }
+            followHtml.append("</td></tr>");
+        }
+        followHtml.append("</table></body></html>");
+        return followHtml.toString();
     }
 
     //Debug for follow

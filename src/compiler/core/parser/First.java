@@ -2,6 +2,7 @@ package compiler.core.parser;
 
 import compiler.core.parser.perl.PerlGrammar;
 import compiler.core.scanner.finiteautomaton.LexicalUnit;
+import compiler.core.utils.HtmlStyler;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -64,6 +65,24 @@ public class First {
             }
         }
         return first;
+    }
+
+    public static String getFirstHtml() {
+        StringBuilder firstHtml = new StringBuilder();
+        firstHtml.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><title>First</title>" + HtmlStyler.getHtmlStyleLeftAlign() + "</head><body><table>");
+        for (First f : getAllFirstList()) {
+            firstHtml.append("<tr><th>" + f.getNonterminal().toString() + "</th><td>");
+            for (LexicalUnit unit : f.getFirstList()) {
+                if (unit != null) {
+                    firstHtml.append(unit.toString() + " ");
+                } else {
+                    firstHtml.append("lambda ");
+                }
+            }
+            firstHtml.append("</td></tr>");
+        }
+        firstHtml.append("</table></body></html>");
+        return firstHtml.toString();
     }
 
     //For debug and output of all firsts
