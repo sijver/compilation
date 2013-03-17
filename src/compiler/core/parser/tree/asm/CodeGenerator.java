@@ -30,9 +30,11 @@ public class CodeGenerator {
         if (commandContainsLexicalUnit(commandTokens, LexicalUnit.PLUS)) {  //PLUS method choosing
             return addition(commandTokens);
         }
+
+        //Other methods has not been realized
         GenerationRule genRule = new GenerationRule();
-        genRule.setGeneratedCode("A");
-        genRule.setCompressIntoToken(new Token(LexicalUnit.MINUS, null));
+        genRule.setGeneratedCode("");
+        genRule.setCompressIntoToken(new Token(null, null));
         return genRule;
     }
 
