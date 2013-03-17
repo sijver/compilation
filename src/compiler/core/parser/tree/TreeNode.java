@@ -109,7 +109,7 @@ public class TreeNode {
     //Returns the text representation of the tree
     public String getTreeText() {
         String a = "";
-        a = a.concat(nodeValue.toString() + " " + rule + "\n");
+        a = a.concat(nodeValue.toString() + " (" + rule + ")\n");
         for (TreeNode child : childrenNodes) {
             a = a.concat("-" + child.getBranchText("|"));
         }
@@ -119,7 +119,7 @@ public class TreeNode {
     //Returns the text representation of the branch of the tree
     private String getBranchText(String s) {
         String a = "";
-        a = a.concat(nodeValue.toString() + " " + rule + "\n");
+        a = a.concat(nodeValue.toString() + " (" + rule + ")\n");
         for (TreeNode child : childrenNodes) {
             a = a.concat(s + "-" + child.getBranchText("|" + s));
         }
@@ -140,7 +140,6 @@ public class TreeNode {
                 removeChildrenNodes();
             }
             if (childrenNodes.size() > 1) { //Compress node if it has more then one child (generate code appropriately to children contain)
-                System.out.println("there must be computing");
                 List<Token> commandTokens = new LinkedList<Token>();    //Choose only Tokens from children, delete all meaningless Nonterminals
                 for (TreeNode node : childrenNodes) {
                     if (node.nodeValue.getClass() == Token.class) {
