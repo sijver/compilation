@@ -27,6 +27,8 @@ public class ParseTree {
     private LinkedList<TreeNode> treeStack; //Stack with tree nodes which is appropriate to the parser stack content
     private TreeNode treeRoot;  //The root node of the tree
 
+    private String parsingErrorMessage;
+
     public ParseTree(List<Token> inputTokensList) {
         this.inputTokensList = inputTokensList;
         outputRulesList = new LinkedList<Integer>();
@@ -51,8 +53,8 @@ public class ParseTree {
         treeStack.addFirst(treeRoot);
     }
 
-    //Parsing method. Constructs the tree
-    public void doParsing() {
+    //Parsing method. Constructs the tree. Returns false if error
+    public boolean doParsing() {
         boolean isSymbolRead;
         for (Token symbol : inputTokensList) {  //Loop for each input token
             isSymbolRead = false;   // Shows is the symbol has being read and we can work with the next input symbol
@@ -69,8 +71,8 @@ public class ParseTree {
 
                         isSymbolRead = true;    //Symbol has been read and we can process the next one
                     } else {    //If stack top lexical unit is not the same as the current token -> then parsing error
-                        System.out.println("Parsing error! Top-most symbol of the stack is not equal to the input stream symbol!");
-                        System.exit(1);
+                        parsingErrorMessage = "Parsing error! Top-most symbol of the stack is not equal to the input stream symbol! (" + stack.getFirst() + " " + symbol.getLexicalUnit() + ")";
+                        return false;
                     }
                 } else {    // Top-most symbol of the stack is the Nonterminal
                     int ruleNumber = parsingTable.getRuleFromCell((Nonterminal) stack.getFirst(), symbol.getLexicalUnit()); //Get parsing table rule for top stack symbol and current input token
@@ -91,16 +93,25 @@ public class ParseTree {
                             }
                         }
                     } else {    //No such rule in parsing table. Parsing error
-                        System.out.println("Parsing error! No such rule! " + stack.getFirst() + " " + symbol.getLexicalUnit());
-                        System.exit(1);
+                        parsingErrorMessage = "Parsing error! No such rule! (" + stack.getFirst() + " " + symbol.getLexicalUnit() + ")";
+                        return false;
                     }
                 }
             }
         }
+        return true;
     }
 
     public List<Integer> getOutputRulesList() {
         return outputRulesList;
+    }
+
+    public TreeNode getTreeRoot() {
+        return treeRoot;
+    }
+
+    public String getParsingErrorMessage() {
+        return parsingErrorMessage;
     }
 
     //For debug. Test of the parser and code generation
